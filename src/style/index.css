@@ -1,0 +1,33 @@
+.navbar-nav .dropdown-menu {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.dropdown-item.active {
+  background-color: #1c2765 !important; /* dark blue */
+  color: #fff !important;
+  font-weight: 500;
+}
+
+
+.summary-row {
+  border-bottom: 1px solid #dee2e6;
+  padding: 0.75rem 0;
+}
+
+.summary-label {
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.summary-value {
+  font-weight: 700;
+}
+
+.content {
+    min-height: 102vh;
+    padding: calc(var(--phoenix-navbar-top-height) + 0rem) 1.5rem 6.375rem 1.5rem;
+    position: relative;
+    padding-bottom: 6rem;
+}
+

@@ -1,0 +1,56 @@
+.login {
+    background-color: rgba(212, 237, 218, 255);
+}
+
+/* Background with linear gradient */
+.login-container {
+    background: linear-gradient(135deg, #28a745, #85e085);
+}
+
+/* Login box styling */
+.login-box {
+    background-color: #ffffff;
+    max-width: 400px;
+    width: 100%;
+    border-radius: 2%;
+    transition: transform 0.3s ease;
+}
+
+.login-box:hover {
+    transform: translateY(-5px);
+}
+
+.primary {
+    background-color: #1c2765 !important;
+    color: #ffff;
+}
+
+.secondary {
+    background-color: #fcb040;
+}
+
+
+.color-white {
+    color: #ffffff !important;
+}
+
+.page-header {
+    color: #5d71a6;
+    font-size: 22px;
+    margin-top: 3%;
+}
+
+.table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: #1c2765;
+    color: #ffffff;
+    border: none !important;
+}
+
+.table th,
+.table td {
+    text-align: center;
+    vertical-align: middle;
+}
