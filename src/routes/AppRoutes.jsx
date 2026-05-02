@@ -1,4 +1,5 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
+import ProtectedRoute from "../routes/ProtectedRoute";
 
 // Admin pages
 import DashboardLayout from "../layouts/DashboardLayout";
@@ -15,7 +16,6 @@ import ProviderDashboard from "../pages/provider/Dashboard";
 import MyServices from "../pages/provider/services/Services";
 import MyBooking from "../pages/provider/bookings/Bookings";
 import Profile from "../pages/provider/profile/Profile";
-// import ServiceForm from "../pages/provider/ServiceForm";
 
 // Auth
 import Login from "../pages/auth/Login";
@@ -23,12 +23,19 @@ import Login from "../pages/auth/Login";
 function AppRoutes() {
   return (
     <Routes>
-      {/* Auth */}
+      {/* Auth - Public Route */}
       <Route path="/login" element={<Login />} />
 
-      {/* Admin Routes */}
-      <Route element={<DashboardLayout />}>
-        <Route path="/" element={<Dashboard />} />
+      {/* Admin Routes - The default starting point */}
+      <Route
+        element={
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }
+      >
+        {/* path="/" now loads the Dashboard inside DashboardLayout */}
+        <Route path="/" element={<Dashboard />} /> 
         <Route path="/users-management" element={<UserForm />} />
         <Route path="/providers-management" element={<Provider />} />
         <Route path="/services-management" element={<Services />} />
@@ -37,7 +44,13 @@ function AppRoutes() {
       </Route>
 
       {/* Provider Routes */}
-      <Route element={<ProviderLayout />}>
+      <Route
+        element={
+          <ProtectedRoute>
+            <ProviderLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route path="/provider/dashboard" element={<ProviderDashboard />} />
         <Route path="/provider/services" element={<MyServices />} />
         <Route path="/provider/bookings" element={<MyBooking />} />
