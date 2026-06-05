@@ -21,12 +21,18 @@ import Profile from "../pages/provider/profile/Profile";
 import Login from "../pages/auth/Login";
 
 function AppRoutes() {
+  const token = localStorage.getItem("access_token");
+
   return (
     <Routes>
-      {/* Auth - Public Route */}
-      <Route path="/login" element={<Login />} />
+      {/* 1. If user is logged in and goes to /login, send them to dashboard. 
+             If not, show Login page. */}
+      <Route 
+        path="/login" 
+        element={token ? <Navigate to="/" replace /> : <Login />} 
+      />
 
-      {/* Admin Routes - The default starting point */}
+      {/* 2. Admin Routes - Protected */}
       <Route
         element={
           <ProtectedRoute>
@@ -34,31 +40,32 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        {/* path="/" now loads the Dashboard inside DashboardLayout */}
-        <Route path="/" element={<Dashboard />} /> 
-        <Route path="/users-management" element={<UserForm />} />
-        <Route path="/providers-management" element={<Provider />} />
-        <Route path="/services-management" element={<Services />} />
-        <Route path="/bookings-management" element={<Bookings />} />
-        <Route path="/payment-management" element={<Payment />} />
+        {/* Use 'index' for the default dashboard page */}
+        <Route index element={<Dashboard />} /> 
+        <Route path="users-management" element={<UserForm />} />
+        <Route path="providers-management" element={<Provider />} />
+        <Route path="services-management" element={<Services />} />
+        <Route path="bookings-management" element={<Bookings />} />
+        <Route path="payment-management" element={<Payment />} />
       </Route>
 
-      {/* Provider Routes */}
+      {/* 3. Provider Routes - Protected */}
       <Route
+        path="/provider"
         element={
           <ProtectedRoute>
             <ProviderLayout />
           </ProtectedRoute>
         }
       >
-        <Route path="/provider/dashboard" element={<ProviderDashboard />} />
-        <Route path="/provider/services" element={<MyServices />} />
-        <Route path="/provider/bookings" element={<MyBooking />} />
-        <Route path="/provider/profile" element={<Profile />} />
+        <Route path="dashboard" element={<ProviderDashboard />} />
+        <Route path="services" element={<MyServices />} />
+        <Route path="bookings" element={<MyBooking />} />
+        <Route path="profile" element={<Profile />} />
       </Route>
 
-      {/* 404 */}
-      <Route path="*" element={<h1>404 - Not Found</h1>} />
+      {/* 4. Catch-all: Redirect unknown routes to root (which checks for login) */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

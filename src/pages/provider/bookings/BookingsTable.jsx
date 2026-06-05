@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { getProviderBookings, updateBookingStatus } from "../../../api/bookingService";
+import ChatModal from "../../../components/chat/ChatModal";
 
 export default function ProviderBookings() {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [chatBooking, setChatBooking] = useState(null);
 
     //  FETCH BOOKINGS
     const fetchBookings = async () => {
@@ -48,12 +50,52 @@ export default function ProviderBookings() {
     const getBadge = (status) => {
         const map = {
             pending: "bg-warning text-dark",
-            accepted: "bg-primary",
+            accepted: "bg-primary text-white",
             "in-progress": "bg-info text-dark",
-            completed: "bg-success",
-            cancelled: "bg-danger",
+            completed: "bg-success text-white",
+            cancelled: "bg-danger text-white",
         };
-        return map[status] || "bg-secondary";
+        return map[status] || "bg-secondary text-white";
+    };
+
+    // Custom miniature tracking timeline for rows
+    const renderMiniTimeline = (status) => {
+        if (status === "cancelled") {
+            return null;
+        }
+
+        const stages = ["pending", "accepted", "in-progress", "completed"];
+        const currentIdx = stages.indexOf(status);
+
+        return (
+            <div className="d-flex flex-column align-items-center mt-2" style={{ minWidth: "120px" }}>
+                <div className="d-flex align-items-center w-100 justify-content-between position-relative px-1" style={{ height: "12px" }}>
+                    {/* Background Line */}
+                    <div className="position-absolute start-0 end-0" style={{ height: "2px", backgroundColor: "#e2e8f0", top: "5px", zIndex: 0 }}></div>
+                    {/* Active Line */}
+                    <div className="position-absolute start-0" style={{ height: "2px", backgroundColor: "#0d6efd", top: "5px", width: `${(currentIdx / 3) * 100}%`, zIndex: 0, transition: "width 0.3s ease" }}></div>
+                    
+                    {stages.map((stage, idx) => {
+                        const isDone = idx <= currentIdx;
+                        return (
+                            <div 
+                                key={idx} 
+                                className="rounded-circle"
+                                style={{
+                                    width: "10px",
+                                    height: "10px",
+                                    backgroundColor: isDone ? "#0d6efd" : "#ffffff",
+                                    border: `1.5px solid ${isDone ? "#0d6efd" : "#94a3b8"}`,
+                                    zIndex: 1,
+                                    cursor: "help"
+                                }}
+                                title={stage.toUpperCase()}
+                            ></div>
+                        );
+                    })}
+                </div>
+            </div>
+        );
     };
 
     return (
@@ -133,64 +175,76 @@ export default function ProviderBookings() {
 
                                     {/* STATUS */}
                                     <td>
-                                        <span className={`badge ${getBadge(b.status)}`}>
-                                            {b.status}
-                                        </span>
+                                        <div className="d-flex flex-column align-items-center">
+                                            <span className={`badge ${getBadge(b.status)}`}>
+                                                {b.status}
+                                            </span>
+                                            {renderMiniTimeline(b.status)}
+                                        </div>
                                     </td>
 
                                     {/* ACTIONS */}
-                                    <td className="d-flex gap-1 flex-wrap">
+                                    <td>
+                                        <div className="d-flex gap-1 flex-wrap">
+                                            {b.status === "pending" && (
+                                                <>
+                                                    <button
+                                                        className="btn btn-sm btn-primary"
+                                                        onClick={() =>
+                                                            handleStatusUpdate(b._id, "accepted")
+                                                        }
+                                                    >
+                                                        Accept
+                                                    </button>
 
-                                        {b.status === "pending" && (
-                                            <>
+                                                    <button
+                                                        className="btn btn-sm btn-danger"
+                                                        onClick={() =>
+                                                            handleStatusUpdate(b._id, "cancelled")
+                                                        }
+                                                    >
+                                                        Reject
+                                                    </button>
+                                                </>
+                                            )}
+
+                                            {b.status === "accepted" && (
                                                 <button
-                                                    className="btn btn-sm btn-primary"
+                                                    className="btn btn-sm btn-info"
                                                     onClick={() =>
-                                                        handleStatusUpdate(b._id, "accepted")
+                                                        handleStatusUpdate(b._id, "in-progress")
                                                     }
                                                 >
-                                                    Accept
+                                                    Start Work
                                                 </button>
+                                            )}
 
+                                            {b.status === "in-progress" && (
                                                 <button
-                                                    className="btn btn-sm btn-danger"
+                                                    className="btn btn-sm btn-success"
                                                     onClick={() =>
-                                                        handleStatusUpdate(b._id, "cancelled")
+                                                        handleStatusUpdate(b._id, "completed")
                                                     }
                                                 >
-                                                    Reject
+                                                    Complete
                                                 </button>
-                                            </>
-                                        )}
+                                            )}
 
-                                        {b.status === "accepted" && (
-                                            <button
-                                                className="btn btn-sm btn-info"
-                                                onClick={() =>
-                                                    handleStatusUpdate(b._id, "in-progress")
-                                                }
-                                            >
-                                                Start Work
-                                            </button>
-                                        )}
+                                            {b.status === "completed" && (
+                                                <span className="text-success small fw-semibold">
+                                                    ✔ Done
+                                                </span>
+                                            )}
 
-                                        {b.status === "in-progress" && (
-                                            <button
-                                                className="btn btn-sm btn-success"
-                                                onClick={() =>
-                                                    handleStatusUpdate(b._id, "completed")
-                                                }
-                                            >
-                                                Complete
-                                            </button>
-                                        )}
-
-                                        {b.status === "completed" && (
-                                            <span className="text-success small">
-                                                ✔ Done
-                                            </span>
-                                        )}
-
+                                            {b.status !== "cancelled" && (
+                                                <button
+                                                    className="btn btn-sm btn-outline-primary d-flex align-items-center gap-1"
+                                                    onClick={() => setChatBooking(b)}
+                                                >
+                                                    💬 Chat
+                                                </button>
+                                            )}
+                                        </div>
                                     </td>
 
                                 </tr>
@@ -201,6 +255,15 @@ export default function ProviderBookings() {
 
                 </table>
             </div>
+
+            {/* CHAT MODAL */}
+            <ChatModal
+                isOpen={!!chatBooking}
+                onClose={() => setChatBooking(null)}
+                bookingId={chatBooking?._id}
+                clientName={chatBooking?.user_id?.username}
+                serviceName={chatBooking?.service_id?.name}
+            />
         </div>
     );
 }
